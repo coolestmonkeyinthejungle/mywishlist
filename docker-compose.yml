@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+
+  mywishlist:
+    build: .
+    environment:
+      - DISPLAY
+      - QT_X11_NO_MITSHM=1
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    command: ["./wait-for-mysql.sh", "mysqldev", "3306", "python3", "./mywishlist.py"]
+    ports:
+      - 8000:8000
+    user: qtuser
+    depends_on:
+      - mysqldev
+    networks:
+      - mynetwork
+
+  mysqldev:
+    image: mysql:latest
+    restart: on-failure
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=password
+      - MYSQL_DATABASE=mywishlist
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - 3308:3306
+    volumes:
+      - ./db:/var/lib/mysql
+    networks:
+     - mynetwork
+
+networks:
+  mynetwork:
